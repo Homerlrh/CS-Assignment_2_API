@@ -16,6 +16,69 @@ namespace Assignment2.Migrations
             modelBuilder
                 .HasAnnotation("ProductVersion", "5.0.4");
 
+            modelBuilder.Entity("Assignment2.Data.Client", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("email")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("firstName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("lastName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Clients");
+                });
+
+            modelBuilder.Entity("Assignment2.Data.Event", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("EventName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Time")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Events");
+                });
+
+            modelBuilder.Entity("Assignment2.Data.JoinedEvent", b =>
+                {
+                    b.Property<int>("ClientID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("EventID")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ClientID", "EventID");
+
+                    b.HasIndex("EventID");
+
+                    b.ToTable("JoinedEvents");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -212,6 +275,25 @@ namespace Assignment2.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
+            modelBuilder.Entity("Assignment2.Data.JoinedEvent", b =>
+                {
+                    b.HasOne("Assignment2.Data.Client", "Client")
+                        .WithMany("JoinedEvent")
+                        .HasForeignKey("ClientID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Assignment2.Data.Event", "Event")
+                        .WithMany("JoinedEvent")
+                        .HasForeignKey("EventID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Client");
+
+                    b.Navigation("Event");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -261,6 +343,16 @@ namespace Assignment2.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Assignment2.Data.Client", b =>
+                {
+                    b.Navigation("JoinedEvent");
+                });
+
+            modelBuilder.Entity("Assignment2.Data.Event", b =>
+                {
+                    b.Navigation("JoinedEvent");
                 });
 #pragma warning restore 612, 618
         }

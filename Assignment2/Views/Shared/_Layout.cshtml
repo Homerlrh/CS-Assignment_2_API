@@ -33,8 +33,8 @@
                                 </a>
                             </li>
                         }
-                        @*@if (User.IsInRole("Admin"))
-                        {*@
+                        @if (User.IsInRole("Admin"))
+                        {
                             <li>
                                 <a asp-area="" class="nav-link text-dark" asp-controller="Role" asp-action="Index">
                                     Roles
@@ -45,7 +45,7 @@
                                     User Roles
                                 </a>
                             </li>
-                        @*}*@
+                        }
                     </ul>
                     <partial name="_LoginPartial" />
                 </div>
