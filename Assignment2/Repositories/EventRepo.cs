@@ -46,5 +46,13 @@ namespace Assignment2.Repositories
             db.SaveChanges();
             return true;
         }
+
+        public bool UnJoinEvent(int eventID , int userID)
+        {
+            JoinedEvent joinEvent = db.JoinedEvents.Where(je => je.ClientID == userID && je.EventID == eventID).FirstOrDefault();
+            db.Remove(joinEvent);
+            db.SaveChanges();
+            return true;
+        }
     }
 }

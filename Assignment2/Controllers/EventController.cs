@@ -23,6 +23,7 @@ namespace Assignment2.Controllers
         }
 
         [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,Manager")]
         public async Task<IActionResult> OnPostAsync([FromBody] Event Event)
         {
             if (ModelState.IsValid)
@@ -53,6 +54,7 @@ namespace Assignment2.Controllers
 
         [HttpGet]
         [Route("Delete")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,Manager")]
         public IActionResult Delete(int eventID)
         {
             try
@@ -80,7 +82,7 @@ namespace Assignment2.Controllers
 
         [HttpGet]
         [Route("JoinEvent")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,Manager")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 
         public IActionResult JoinEvent(int eventID)
         {
@@ -95,13 +97,31 @@ namespace Assignment2.Controllers
 
             var responseObject = new
             {
-                StatusCode = "Ok",
+                StatusCode = "You being added to the guest list",
             };
             return new ObjectResult(responseObject);
         }
 
+        [HttpGet]
+        [Route("UnJoinEvent")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public IActionResult UnJoinEvent (int eventID)
+        {
+            ClientRepo cRP = new ClientRepo(_context);
+            EventRepo eRP = new EventRepo(_context);
+            var claim = HttpContext.User.Claims.ElementAt(0);
+            string email = claim.Value;
+            var user = cRP.GetOneByEmail(email);
 
+            eRP.UnJoinEvent(eventID, user.ID);
 
+            var responseObject = new
+            {
+                StatusCode = "You are no longer attending this event",
+            };
+            return new ObjectResult(responseObject);
+
+        }
 
     }
 }
