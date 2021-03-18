@@ -23,11 +23,11 @@ namespace Assignment2.Data
         public string firstName { get; set; }
 
         [Display(Name = "Email")]
+        [EmailAddress]
         [Required]
         public string email { get; set; }
 
         public virtual ICollection<JoinedEvent> JoinedEvent { get; set; }
-
     }
 
     public class Event
@@ -37,12 +37,14 @@ namespace Assignment2.Data
         public int ID { get; set; }
 
         [Required]
+        [DataType(DataType.DateTime)]
         public DateTime Date { get; set; }
 
         [Required]
-        public DateTime Time { get; set; }
+        [RegularExpression(@"^(2[0-3]|[01]?[0-9]):(0[0-9])|([0-5]?[0-9])$", ErrorMessage = "Please input your time in 24 hr format (xx:xx)")]
+        public string Time { get; set; }
 
-        [Required]
+        [Required] 
         public string EventName { get; set; }
 
         [Required]
@@ -65,6 +67,7 @@ namespace Assignment2.Data
         public virtual Client Client { get; set; }
         public virtual Event Event { get; set; }
     }
+
     public class ApplicationDbContext : IdentityDbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }

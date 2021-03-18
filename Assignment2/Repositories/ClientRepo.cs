@@ -15,7 +15,20 @@ namespace Assignment2.Repositories
         {
             db = context;
         }
+        public Client GetOneByEmail(string email)
+        {
+            var user = db.Clients.Where(c => c.email == email).FirstOrDefault();
 
+            return user;
+        }
+        public bool isExist (string email)
+        {
+            var isRegister = GetOneByEmail(email);
+
+            if (isRegister != null)
+                return true;
+            return false;
+        }
 
         public bool Create(string LN, string FN, string email)
         {

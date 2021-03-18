@@ -47,13 +47,25 @@ namespace Assignment2.Controllers
         [HttpPost]
         public async Task<IActionResult> OnPostAsync([FromBody] RegisVM RegisVM)
         {
+            ClientRepo cRP = new ClientRepo(_context);
+
             if (ModelState.IsValid)
             {
+                if (cRP.isExist(RegisVM.Email))
+                {
+                    var Obj = new
+                    {
+                        errorMessage = "User Already Exist",
+                        StatusCode = "Invalid Login."
+
+                    };
+
+                    return new ObjectResult(Obj);
+                }
                 var user = new IdentityUser { UserName = RegisVM.Username, Email = RegisVM.Email, };
                 var result = await _userManager.CreateAsync(user, RegisVM.Password);
                 if (result.Succeeded)
                 {
-                    ClientRepo cRP = new ClientRepo(_context);
                     bool isNewClient = cRP.Create(RegisVM.LastName, RegisVM.FirstName, RegisVM.Email);
 
                     if (isNewClient)
