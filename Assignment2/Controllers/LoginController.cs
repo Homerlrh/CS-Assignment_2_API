@@ -1,4 +1,5 @@
 ﻿using Assignment2.Data;
+using Assignment2.Repositories;
 using Assignment2.ViewModels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -53,6 +54,12 @@ namespace Assignment2.Controllers
                     var UserManager = _serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
                     var user = await UserManager.FindByEmailAsync(loginVM.Email);
 
+                    ClientRepo cRP = new ClientRepo(_context);
+                    var userInfo = cRP.GetOneByEmail(loginVM.Email);
+
+                    var userRoleList = _context.UserRoles.Where(ur => ur.UserId == user.Id);
+
+                    string userName = userInfo.userName;
                     if (user != null)
                     {
                         var tokenString = GenerateJSONWebToken(user);
@@ -60,7 +67,9 @@ namespace Assignment2.Controllers
                         {
                             tokenString = tokenString,
                             StatusCode = "OK",
-                            currentUser = loginVM.Email
+                            currentUser = loginVM.Email,
+                            userName,
+                            role = userRoleList
                         };
 
                         return new ObjectResult(jsonOK);

@@ -15,6 +15,28 @@ namespace Assignment2.Repositories
             db = context;
         }
 
+        public IQueryable<Event> GetAll()
+        {
+            var query = from e in db.Events
+                        select new Event()
+                        {
+                            EventName = e.EventName,
+                            Description = e.Description,
+                            Date= e.Date,
+                            Time=e.Time,
+                            ID = e.ID
+                        };
+
+            return query;
+        }
+
+        public Event GetOne(int eventID)
+        {
+            var query = GetAll().Where(x => x.ID == eventID).FirstOrDefault();
+            return query;
+        }
+
+
         public bool Create(string eventName , string description, DateTime date, string time)
         {
             Event newEvent = new Event()

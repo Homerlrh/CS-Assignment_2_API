@@ -30,10 +30,11 @@ namespace Assignment2.Repositories
             return false;
         }
 
-        public bool Create(string LN, string FN, string email)
+        public bool Create(string UN, string LN, string FN, string email)
         {
             Client client = new Client()
             {
+                userName = UN,
                 lastName = LN,
                 firstName = FN,
                 email = email

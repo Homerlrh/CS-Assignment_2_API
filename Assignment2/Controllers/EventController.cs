@@ -22,6 +22,31 @@ namespace Assignment2.Controllers
             _context = context;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> OnGetAsync ()
+        {
+            EventRepo eRP = new EventRepo(_context);
+            var query = eRP.GetAll();
+            var responseObject = new
+            {
+                EventArray = query,
+            };
+            return new ObjectResult(responseObject);
+        }
+
+        [HttpGet]
+        [Route("getOne")]
+        public IActionResult GetOne(int eventID)
+        {
+            EventRepo eRP = new EventRepo(_context);
+            var query = eRP.GetOne(eventID);
+            var responseObject = new
+            {
+                EventArray = query,
+            };
+            return new ObjectResult(responseObject);
+        }
+
         [HttpPost]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,Manager")]
         public async Task<IActionResult> OnPostAsync([FromBody] Event Event)
@@ -63,7 +88,8 @@ namespace Assignment2.Controllers
                 eRP.Delete(eventID);
                 var Obj = new
                 {
-                    StatusCode = "Deleted",
+                    StatusCode = "ok",
+                    message= "Deleted"
                 };
 
                 return new ObjectResult(Obj);
@@ -72,7 +98,8 @@ namespace Assignment2.Controllers
             {
                 var Obj = new
                 {
-                    errorMessage = "something went wrong, please try again",
+                    StatusCode = "error",
+                    message = "You can't delete event due to there's still people want to attend."
                 };
 
                 return new ObjectResult(Obj);
@@ -93,13 +120,27 @@ namespace Assignment2.Controllers
             string email = claim.Value;
             var user = cRP.GetOneByEmail(email);
 
-            eRP.JoinEvent(eventID, user.ID);
-
-            var responseObject = new
+            try
             {
-                StatusCode = "You being added to the guest list",
-            };
-            return new ObjectResult(responseObject);
+                eRP.JoinEvent(eventID, user.ID);
+
+                var responseObject = new
+                {
+                    StatusCode = "You being added to the guest list",
+                };
+                return new ObjectResult(responseObject);
+
+            }
+            catch
+            {
+                var responseObject = new
+                {
+                    error = "You already added to the guest list",
+                };
+                return new ObjectResult(responseObject);
+            }
+
+           
         }
 
         [HttpGet]
@@ -112,15 +153,59 @@ namespace Assignment2.Controllers
             var claim = HttpContext.User.Claims.ElementAt(0);
             string email = claim.Value;
             var user = cRP.GetOneByEmail(email);
+            try
+            {
+                eRP.UnJoinEvent(eventID, user.ID);
 
-            eRP.UnJoinEvent(eventID, user.ID);
+                var responseObject = new
+                {
+                    StatusCode = "You are no longer attending this event",
+                };
+                return new ObjectResult(responseObject);
 
+            }
+            catch
+            {
+                var responseObject = new
+                {
+                    error = "You are not in the guest list",
+                };
+                return new ObjectResult(responseObject);
+            }
+           
+
+        }
+
+        [HttpGet]
+        [Route("MyEvent")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public IActionResult MyEvent()
+        {
+            ClientEventRepo ceRP = new ClientEventRepo(_context);
+            ClientRepo cRP = new ClientRepo(_context);
+            var claim = HttpContext.User.Claims.ElementAt(0);
+            string email = claim.Value;
+            var user = cRP.GetOneByEmail(email);
+            var query = ceRP.GetCurrentClientEvents(user.ID);
             var responseObject = new
             {
-                StatusCode = "You are no longer attending this event",
+                EventArray = query,
             };
             return new ObjectResult(responseObject);
+        }
 
+        [HttpGet]
+        [Route("GetAttendees")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public IActionResult GetAttendees(int eventID)
+        {
+            ClientEventRepo ceRP = new ClientEventRepo(_context);
+            var query = ceRP.ViewAttendees(eventID);
+            var responseObject = new
+            {
+                EventArray = query,
+            };
+            return new ObjectResult(responseObject);
         }
 
     }

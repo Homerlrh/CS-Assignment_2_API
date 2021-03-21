@@ -14,6 +14,10 @@ namespace Assignment2.Data
         [Display(Name = "User ID")]
         public int ID { get; set; }
 
+        [Display(Name = "user Name")]
+        [Required]
+        public string userName { get; set; }
+
         [Display(Name = "Last Name")]
         [Required]
         public string lastName { get; set; }
@@ -41,7 +45,7 @@ namespace Assignment2.Data
         public DateTime Date { get; set; }
 
         [Required]
-        [RegularExpression(@"^(2[0-3]|[01]?[0-9]):(0[0-9])|([0-5]?[0-9])$", ErrorMessage = "Please input your time in 24 hr format (xx:xx)")]
+        [RegularExpression(@"^(2[0-3]|[01]?[0-9]):([0-5][0-9])$", ErrorMessage = "Please input your time in 24 hr format (xx:xx)")]
         public string Time { get; set; }
 
         [Required] 

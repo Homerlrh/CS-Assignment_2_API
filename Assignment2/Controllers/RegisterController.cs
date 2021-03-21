@@ -1,11 +1,13 @@
 ﻿using Assignment2.Data;
 using Assignment2.Repositories;
 using Assignment2.ViewModels;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -30,6 +32,9 @@ namespace Assignment2.Controllers
         private IServiceProvider _serviceProvider;
         private ApplicationDbContext _context;
 
+        public IList<AuthenticationScheme> ExternalLogins { get; set; }
+
+
 
         public RegisterController(UserManager<IdentityUser> userManager,
         SignInManager<IdentityUser> signInManager,
@@ -48,7 +53,7 @@ namespace Assignment2.Controllers
         public async Task<IActionResult> OnPostAsync([FromBody] RegisVM RegisVM)
         {
             ClientRepo cRP = new ClientRepo(_context);
-
+            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
                 if (cRP.isExist(RegisVM.Email))
@@ -56,17 +61,21 @@ namespace Assignment2.Controllers
                     var Obj = new
                     {
                         errorMessage = "User Already Exist",
-                        StatusCode = "Invalid Login."
+                        StatusCode = "Invalid Register."
 
                     };
 
                     return new ObjectResult(Obj);
                 }
-                var user = new IdentityUser { UserName = RegisVM.Username, Email = RegisVM.Email, };
+                var user = new IdentityUser { UserName = RegisVM.Email, Email = RegisVM.Email, };
                 var result = await _userManager.CreateAsync(user, RegisVM.Password);
                 if (result.Succeeded)
                 {
-                    bool isNewClient = cRP.Create(RegisVM.LastName, RegisVM.FirstName, RegisVM.Email);
+                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                    var enCode = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
+                    await _userManager.ConfirmEmailAsync(user, enCode);
+                    bool isNewClient = cRP.Create(RegisVM.Username, RegisVM.LastName, RegisVM.FirstName, RegisVM.Email);
 
                     if (isNewClient)
                     {
@@ -84,7 +93,7 @@ namespace Assignment2.Controllers
                     }
                 }
             }
-            var jsonInvalid = new { tokenString = "", StatusCode = "Invalid Login." };
+            var jsonInvalid = new { tokenString = "", StatusCode = "Invalid register." };
             return new ObjectResult(jsonInvalid);
         }
 
